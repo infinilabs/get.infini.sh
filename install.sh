@@ -142,9 +142,6 @@ check_platform() {
 function install_binary() {
   local download_url="https://dl-global.infinilabs.com/${program_name}/stable/${program_name}-${version}-${file_ext}"
 
-  echo "Fetching: [${download_url}]"
-  echo ""
-
   tmp_dir="$(mktemp -d)"
   cd "$tmp_dir"
   if command -v curl >/dev/null 2>&1; then
@@ -189,7 +186,6 @@ function main() {
 
   install_binary
 
-  echo ""
   echo ""
   echo "Installation complete. [${program_name}] is ready to use!"
   echo ""
