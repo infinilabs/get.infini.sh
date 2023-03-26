@@ -11,6 +11,47 @@ function print_usage() {
   exit 1
 }
 
+function print_header() {
+    echo "                                            "
+    echo "                                 @@@@@@@@@@@"
+    echo "                                @@@@@@@@@@@@"
+    echo "                                @@@@@@@@@@@@"
+    echo "                               @@@@@@@@@&@@@"
+    echo "                              #@@@@@@@@@@@@@"
+    echo "        @@@                   @@@@@@@@@@@@@ "
+    echo "       &@@@@@@@              &@@@@@@@@@@@@@ "
+    echo "       @&@@@@@@@&@           @@@&@@@@@@@&@  "
+    echo "      @@@@@@@@@@@@@@@@      @@@@@@@@@@@@@@  "
+    echo "      @@@@@@@@@@@@@@@@@@&   @@@@@@@@@@@@@   "
+    echo "        %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   "
+    echo "            @@@@@@@@@@@@&@@@@@@@@@@@@@@@    "
+    echo "    @@         ,@@@@@@@@@@@@@@@@@@@@@@@&    "
+    echo "    @@@@@.         @@@@@&@@@@@@@@@@@@@@     "
+    echo "   @@@@@@@@@@          @@@@@@@@@@@@@@@#     "
+    echo "   @&@@@&@@@&@@@          &@&@@@&@@@&@      "
+    echo "  @@@@@@@@@@@@@.              @@@@@@@*      "
+    echo "  @@@@@@@@@@@@@                  %@@@       "
+    echo " @@@@@@@@@@@@@                              "
+    echo "/@@@@@@@&@@@@@                              "
+    echo "@@@@@@@@@@@@@                               "
+    echo "@@@@@@@@@@@@@                               "
+    echo "@@@@@@@@@@@@        Welcome to INFINI Labs!"
+    echo ""
+    echo ""
+    echo "Now attempting the installation... "
+    echo ""
+}
+
+function print_footprint() {
+		echo "   __ _  __ ____ __ _  __ __     "
+		echo "  / // |/ // __// // |/ // /    "
+		echo " / // || // _/ / // || // /    "
+		echo "/_//_/|_//_/  /_//_/|_//_/   "
+		echo ""
+		echo "©INFINI.LTD, All Rights Reserved."
+		echo ""
+}
+
 function check_dir() {
   if [[ ! -d "$install_dir" ]]; then
     mkdir -p "$install_dir"
@@ -101,6 +142,9 @@ check_platform() {
 function install_binary() {
   local download_url="https://dl-global.infinilabs.com/${program_name}/stable/${program_name}-${version}-${file_ext}"
 
+  echo "Fetching: [${download_url}]"
+  echo ""
+
   tmp_dir="$(mktemp -d)"
   cd "$tmp_dir"
   if command -v curl >/dev/null 2>&1; then
@@ -135,6 +179,8 @@ function main() {
   version=${version:-0.8.1-959}
   file_ext=""
 
+  echo "Name: [${program_name}], Version: [${version}], Path: [${install_dir}]"
+
   check_dir
 
   check_root
@@ -143,8 +189,21 @@ function main() {
 
   install_binary
 
-  echo "Install success,You can run ${program_name} by cd ${install_dir} && sudo `ls ${install_dir}/${program_name}-*`."
+  echo ""
+  echo ""
+  echo "Installation complete. [${program_name}] is ready to use!"
+  echo ""
+  echo ""
+  echo "----------------------------------------------------------------"
+  echo "cd ${install_dir} && sudo `ls ${install_dir}/${program_name}-*`."
+  echo "----------------------------------------------------------------"
+  echo ""
+  echo ""
 
+  print_footprint
 }
 
+print_header
+
 main "$@"
+
