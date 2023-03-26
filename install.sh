@@ -195,7 +195,7 @@ function main() {
   echo ""
   echo ""
   echo "----------------------------------------------------------------"
-  echo "cd ${install_dir} && sudo `ls ${install_dir}/${program_name}-*`."
+  echo "cd ${install_dir} && sudo `ls ${install_dir}/${program_name}-*`"
   echo "----------------------------------------------------------------"
   echo ""
   echo ""
