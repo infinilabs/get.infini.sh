@@ -52,16 +52,16 @@ function print_footprint() {
 		echo ""
 }
 
+function check_root() {
+  [[ $(id -u) == "0" ]] || { echo "Error: This script must be run as root or sudo." >&2; exit 1; }
+}
+
 function check_dir() {
   if [[ ! -d "$install_dir" ]]; then
     mkdir -p "$install_dir"
   else
     echo "Error: Install dir should clean, please delete folder $install_dir." >&2; exit 1;
   fi
-}
-
-function check_root() {
-  [[ $(id -u) == "0" ]] || { echo "Error: This script must be run as root or sudo." >&2; exit 1; }
 }
 
 check_platform() {
@@ -178,12 +178,9 @@ function main() {
 
   echo "Name: [${program_name}], Version: [${version}], Path: [${install_dir}]"
 
-  check_dir
-
   check_root
-
+  check_dir
   check_platform
-
   install_binary
 
   echo ""
