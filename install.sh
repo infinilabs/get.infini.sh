@@ -3,7 +3,7 @@
 set -euo pipefail
 
 function print_usage() {
-  echo "Usage: curl -sSL http://get.infini.sh | sudo bash -s -- -p program_name -v version -d install_dir"
+  echo "Usage: curl -sSL http://get.infini.sh | bash -s -- -p program_name -v version -d install_dir"
   echo "Options:"
   echo "  -p, --program-name <name>   Name of the program to install"
   echo "  -v, --version <version>     Version of the program to install"
@@ -178,7 +178,6 @@ function main() {
 
   echo "Name: [${program_name}], Version: [${version}], Path: [${install_dir}]"
 
-  check_root
   check_dir
   check_platform
   install_binary
@@ -188,7 +187,7 @@ function main() {
   echo ""
   echo ""
   echo "----------------------------------------------------------------"
-  echo "cd ${install_dir} && sudo `ls ${install_dir}/${program_name}-*`"
+  echo "cd ${install_dir} && `ls ${install_dir}/${program_name}-*`"
   echo "----------------------------------------------------------------"
   echo ""
   echo ""
