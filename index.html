@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 
 function print_usage() {
-  echo "Usage: curl -sSL http://get.infini.sh | bash -s -- -p program_name -v version -d install_dir"
+  echo "Usage: curl -sSL http://get.infini.sh | bash -s -- [-p program_name] [-v program_version] [-d install_dir]"
   echo "Options:"
-  echo "  -p, --program-name <name>   Name of the program to install"
-  echo "  -v, --version <version>     Version of the program to install"
-  echo "  -d, --install-dir <dir>     Directory to install the program"
+  echo "  -p, --program-name <name>   Name of the program to install which default is console"
+  echo "  -v, --version <version>     Version of the program to install which default is latest"
+  echo "  -d, --install-dir <dir>     Directory of the program install which default is /opt/program"
   exit 1
 }
 
@@ -52,15 +52,32 @@ function print_footprint() {
 		echo ""
 }
 
+__try() {
+  if [[ $try_status -eq 0 ]]; then
+    ! exception=$( $@ 2>&1 >/dev/null)
+    try_status=${PIPESTATUS[0]}
+  fi
+}
+
+__catch() {
+  _old_try=$try_status
+  try_status=0
+  [[ $_old_try -ne 0 ]]
+}
+
 function get_latest_version() {
   echo `curl -m3 -s "https://release.infinilabs.com/.latest" |sed 's/",/"/;s/"//g;s/://1' |egrep -v '^[{}]' |grep "$1" |awk '{print $NF}'`
 }
 
 function check_dir() {
   if [[ ! -d "$install_dir" ]]; then
-    mkdir -p "$install_dir"
-  else
-    echo "Error: Install dir should clean, please delete folder $install_dir." >&2; exit 1;
+    __try mkdir -p "$install_dir"
+    if __catch e; then
+      echo -e "Error: Unable to create installation directory, please manually create and reinstall.\nsudo mkdir -p ${install_dir} && sudo chown -R \${USER} ${install_dir}" >&2; exit 1;
+    fi
+  fi
+  if [[ "$(ls -A $install_dir)" ]]; then
+    echo "Error: The installation directory $install_dir should be clean." >&2; exit 1;
   fi
 }
 
