@@ -52,8 +52,8 @@ function print_footprint() {
 		echo ""
 }
 
-function check_root() {
-  [[ $(id -u) == "0" ]] || { echo "Error: This script must be run as root or sudo." >&2; exit 1; }
+function get_latest_version() {
+  echo `curl -m3 -s "https://release.infinilabs.com/.latest" |sed 's/",/"/;s/"//g;s/://1' |egrep -v '^[{}]' |grep "$1" |awk '{print $NF}'`
 }
 
 function check_dir() {
@@ -155,9 +155,9 @@ function install_binary() {
     exit 1
   fi
   if [[ "$file_ext" == *".tar.gz" ]]; then
-      tar -C "$install_dir" -xzf "${program_name}-${version}-${file_ext}" > /dev/null 2>&1
+      tar -C "$install_dir" -xzf "${program_name}-${version}-${file_ext}"
   else
-      unzip "${program_name}-${version}-${file_ext}" -d "$install_dir" > /dev/null 2>&1
+      unzip -q "${program_name}-${version}-${file_ext}" -d "$install_dir"
   fi
   
   rm -rf "$tmp_dir"
@@ -175,7 +175,8 @@ function main() {
 
   program_name=${program_name:-console}
   install_dir=${install_dir:-/opt/$program_name}
-  version=${version:-0.8.1-959}
+  latest_version=$(get_latest_version $program_name)
+  version=${version:-$latest_version}
   file_ext=""
 
   echo "Name: [${program_name}], Version: [${version}], Path: [${install_dir}]"
@@ -184,12 +185,14 @@ function main() {
   check_platform
   install_binary
 
+  [ "$program_name" == "easysearch" ] && exe_name="bin/initialize.sh && bin/${program_name}" || exe_name=./${program_name}-${file_ext%%.*}
+
   echo ""
   echo "Installation complete. [${program_name}] is ready to use!"
   echo ""
   echo ""
   echo "----------------------------------------------------------------"
-  echo "cd ${install_dir} && `ls ${install_dir}/${program_name}-*`"
+  echo "cd ${install_dir} && ${exe_name}"
   echo "----------------------------------------------------------------"
   echo ""
   echo ""
