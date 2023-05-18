@@ -1,8 +1,8 @@
 # How to use
 
 ```bash
-#please make sure current operator user have permissionn for install directory, e.g /opt/console
-#also you can initialize the install dir before directory. 
+#Please ensure that the current operator user has permission to install the directory, such as /opt/console
+#initialize the installation directory
 sudo mkdir -p /opt/console && sudo chown -R ${USER} /opt/console
 
 #latest version
