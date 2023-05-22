@@ -115,6 +115,12 @@ function check_platform() {
                 "mips64el")
                     file_ext="linux-mips64le.tar.gz"
                     ;;
+                "loong64")
+                    file_ext="linux-loong64.tar.gz"
+                    ;;
+                "riscv64")
+                    file_ext="linux-riscv64.tar.gz"
+                    ;;
                 *)
                     echo "Unsupported architecture: $arch" >&2
                     exit 1
