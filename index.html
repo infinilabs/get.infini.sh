@@ -66,7 +66,7 @@ __catch() {
 }
 
 function get_latest_version() {
-  echo `curl -m3 -s "https://release.infinilabs.com/.latest" |sed 's/",/"/;s/"//g;s/://1' |egrep -v '^[{}]' |grep "$1" |awk '{print $NF}'`
+  echo `curl -m3 -s "https://release.infinilabs.com/.latest" |sed 's/",/"/;s/"//g;s/://1' |grep -Ev '^[{}]' |grep "$1" |awk '{print $NF}'`
 }
 
 function check_dir() {
@@ -163,8 +163,11 @@ function check_platform() {
 }
 
 function install_binary() {
-  local download_url="https://dl-global.infinilabs.com/${program_name}/stable/${program_name}-${version}-${file_ext}"
+  if [[ $(uname) == "Linux" && "$program_name" == "easysearch" ]]; then
+    file_ext="linux-amd64.tar.gz"
+  fi
 
+  local download_url="https://dl-global.infinilabs.com/${program_name}/stable/${program_name}-${version}-${file_ext}"
   echo $download_url
 
   tmp_dir="$(mktemp -d)"
