@@ -76,6 +76,12 @@ function check_dir() {
       echo -e "Error: Unable to create installation directory, please manually create and reinstall.\nsudo mkdir -p ${install_dir} && sudo chown -R \${USER} ${install_dir}" >&2; exit 1;
     fi
   fi
+
+  owner=$(ls -ld "$install_dir" |awk '{print $3}')
+  if [[ "$owner" != "${USER}" ]]; then
+    echo "Error: The installation directory $install_dir should be owner by ${USER}.\nsudo chown -R \${USER} ${install_dir}" >&2; exit 1;
+  fi
+
   if [[ "$(ls -A $install_dir)" ]]; then
     echo "Error: The installation directory $install_dir should be clean." >&2; exit 1;
   fi
