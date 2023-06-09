@@ -176,7 +176,7 @@ function install_binary() {
     file_ext="linux-amd64.tar.gz"
   fi
 
-  local download_url="https://dl-global.infinilabs.com/${program_name}/stable/${program_name}-${version}-${file_ext}"
+  local download_url="https://release.infinilabs.com/${program_name}/stable/${program_name}-${version}-${file_ext}"
   echo "File: [$download_url]"
 
   tmp_dir="$(mktemp -d)"
