@@ -79,7 +79,7 @@ function check_dir() {
 
   owner=$(ls -ld "${install_dir}" |awk '{print $3}')
   if [[ "${owner}" != "${USER}" ]]; then
-    echo -e "Error: The installation directory ${install_dir} should be owner by ${USER}.\nsudo chown -R \${USER} ${install_dir}" >&2; exit 1;
+    echo -e "Error: The installation directory ${install_dir} should be owner by current user.\nsudo chown -R \${USER} ${install_dir}" >&2; exit 1;
   fi
 
   if [[ "$(ls -A ${install_dir})" ]]; then
@@ -182,13 +182,10 @@ function install_binary() {
   tmp_dir="$(mktemp -d)"
   cd "$tmp_dir"
 
-  if command -v wget >/dev/null 2>&1; then
+  if command -v curl >/dev/null 2>&1; then
+    curl -# -LO "$download_url"
+  elif command -v wget >/dev/null 2>&1; then
     wget -q -nc --show-progress --progress=bar:force:noscroll "$download_url"
-  elif command -v curl >/dev/null 2>&1; then
-    __try curl -# -C - -O "$download_url"
-    if __catch e; then
-      curl -# -C - -O "$download_url"
-    fi
   else
     echo "Error: Could not find curl or wget, Please install wget or curl in advance." >&2; exit 1;
   fi
