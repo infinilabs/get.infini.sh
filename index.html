@@ -3,247 +3,244 @@
 set -eo pipefail
 
 function print_usage() {
-echo "Usage: curl -sSL http://get.infini.sh | bash -s -- [-p program_name] [-v program_version] [-d install_dir]"
-echo "Options:"
-echo " -p, --program-name <name> Name of the program to install which default is console"
-  echo " -v, --version <version> Version of the program to install which default is latest"
-    echo " -d, --install-dir <dir> Directory of the program install which default is /opt/program"
-      exit 1
-      }
+  echo "Usage: curl -sSL http://get.infini.sh | bash -s -- [-p program_name] [-v program_version] [-d install_dir]"
+  echo "Options:"
+  echo "  -p, --program-name <name>   Name of the program to install which default is console"
+  echo "  -v, --version <version>     Version of the program to install which default is latest"
+  echo "  -d, --install-dir <dir>     Directory of the program install which default is /opt/program"
+  exit 1
+}
 
-      function print_header() {
-      echo " "
-      echo " @@@@@@@@@@@"
-      echo " @@@@@@@@@@@@"
-      echo " @@@@@@@@@@@@"
-      echo " @@@@@@@@@&@@@"
-      echo " #@@@@@@@@@@@@@"
-      echo " @@@ @@@@@@@@@@@@@ "
-      echo " &@@@@@@@ &@@@@@@@@@@@@@ "
-      echo " @&@@@@@@@&@ @@@&@@@@@@@&@ "
-      echo " @@@@@@@@@@@@@@@@ @@@@@@@@@@@@@@ "
-      echo " @@@@@@@@@@@@@@@@@@& @@@@@@@@@@@@@ "
-      echo " %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ "
-      echo " @@@@@@@@@@@@&@@@@@@@@@@@@@@@ "
-      echo " @@ ,@@@@@@@@@@@@@@@@@@@@@@@& "
-      echo " @@@@@. @@@@@&@@@@@@@@@@@@@@ "
-      echo " @@@@@@@@@@ @@@@@@@@@@@@@@@# "
-      echo " @&@@@&@@@&@@@ &@&@@@&@@@&@ "
-      echo " @@@@@@@@@@@@@. @@@@@@@* "
-      echo " @@@@@@@@@@@@@ %@@@ "
-      echo " @@@@@@@@@@@@@ "
-      echo "/@@@@@@@&@@@@@ "
-      echo "@@@@@@@@@@@@@ "
-      echo "@@@@@@@@@@@@@ "
-      echo "@@@@@@@@@@@@ Welcome to INFINI Labs!"
-      echo ""
-      echo ""
-      echo "Now attempting the installation... "
-      echo ""
-      }
+function print_header() {
+    echo "                                            "
+    echo "                                 @@@@@@@@@@@"
+    echo "                                @@@@@@@@@@@@"
+    echo "                                @@@@@@@@@@@@"
+    echo "                               @@@@@@@@@&@@@"
+    echo "                              #@@@@@@@@@@@@@"
+    echo "        @@@                   @@@@@@@@@@@@@ "
+    echo "       &@@@@@@@              &@@@@@@@@@@@@@ "
+    echo "       @&@@@@@@@&@           @@@&@@@@@@@&@  "
+    echo "      @@@@@@@@@@@@@@@@      @@@@@@@@@@@@@@  "
+    echo "      @@@@@@@@@@@@@@@@@@&   @@@@@@@@@@@@@   "
+    echo "        %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   "
+    echo "            @@@@@@@@@@@@&@@@@@@@@@@@@@@@    "
+    echo "    @@         ,@@@@@@@@@@@@@@@@@@@@@@@&    "
+    echo "    @@@@@.         @@@@@&@@@@@@@@@@@@@@     "
+    echo "   @@@@@@@@@@          @@@@@@@@@@@@@@@#     "
+    echo "   @&@@@&@@@&@@@          &@&@@@&@@@&@      "
+    echo "  @@@@@@@@@@@@@.              @@@@@@@*      "
+    echo "  @@@@@@@@@@@@@                  %@@@       "
+    echo " @@@@@@@@@@@@@                              "
+    echo "/@@@@@@@&@@@@@                              "
+    echo "@@@@@@@@@@@@@                               "
+    echo "@@@@@@@@@@@@@                               "
+    echo "@@@@@@@@@@@@        Welcome to INFINI Labs!"
+    echo ""
+    echo ""
+    echo "Now attempting the installation... "
+    echo ""
+}
 
-      function print_footprint() {
-      echo " __ _ __ ____ __ _ __ __ "
-      echo " / // |/ // __// // |/ // / "
-      echo " / // || // _/ / // || // / "
-      echo "/_//_/|_//_/ /_//_/|_//_/ "
-      echo ""
-      echo "©INFINI.LTD, All Rights Reserved."
-      echo ""
-      }
+function print_footprint() {
+		echo "   __ _  __ ____ __ _  __ __     "
+		echo "  / // |/ // __// // |/ // /    "
+		echo " / // || // _/ / // || // /    "
+		echo "/_//_/|_//_/  /_//_/|_//_/   "
+		echo ""
+		echo "©INFINI.LTD, All Rights Reserved."
+		echo ""
+}
 
-      __try() {
-      if [[ $try_status -eq 0 ]]; then
-      ! exception=$( $@ 2>&1 >/dev/null )
-      try_status=${PIPESTATUS[0]}
-      fi
-      }
+__try() {
+  if [[ $try_status -eq 0 ]]; then
+    ! exception=$( $@ 2>&1 >/dev/null )
+    try_status=${PIPESTATUS[0]}
+  fi
+}
 
-      __catch() {
-      _old_try=$try_status
-      try_status=0
-      [[ $_old_try -ne 0 ]]
-      }
+__catch() {
+  _old_try=$try_status
+  try_status=0
+  [[ $_old_try -ne 0 ]]
+}
 
-      function get_latest_version() {
-      echo $(curl -m3 -s "https://release.infinilabs.com/.latest" |sed 's/",/"/;s/"//g;s/://1' |grep -Ev '^[{}]' |grep
-      "$program_name" |awk '{print $NF}')
-      }
+function get_latest_version() {
+  echo $(curl -m3 -s "https://release.infinilabs.com/.latest" |sed 's/",/"/;s/"//g;s/://1' |grep -Ev '^[{}]' |grep "$program_name" |awk '{print $NF}')
+}
 
-      function check_dir() {
-      if [[ ! -d "${install_dir}" ]]; then
-      __try mkdir -p "${install_dir}"
-      if __catch e; then
-      echo -e "Error: Unable to create installation directory, please manually create and reinstall.\nsudo mkdir -p
-      ${install_dir} && sudo chown -R \$(whoami) ${install_dir}" >&2; exit 1;
-      fi
-      fi
+function check_dir() {
+  if [[ ! -d "${install_dir}" ]]; then
+    __try mkdir -p "${install_dir}"
+    if __catch e; then
+      echo -e "Error: Unable to create installation directory, please manually create and reinstall.\nsudo mkdir -p ${install_dir} && sudo chown -R \$(whoami) ${install_dir}" >&2; exit 1;
+    fi
+  fi
 
-      owner=$(ls -ld "${install_dir}" |awk '{print $3}')
-      if [[ "${owner}" != "$(whoami)" ]]; then
-      echo -e "Error: The installation directory ${install_dir} should be owner by current user.\nsudo chown -R
-      \$(whoami) ${install_dir}" >&2; exit 1;
-      fi
+  owner=$(ls -ld "${install_dir}" |awk '{print $3}')
+  if [[ "${owner}" != "$(whoami)" ]]; then
+    echo -e "Error: The installation directory ${install_dir} should be owner by current user.\nsudo chown -R \$(whoami) ${install_dir}" >&2; exit 1;
+  fi
 
-      if [[ "$(ls -A ${install_dir})" ]]; then
-      echo "Error: The installation directory ${install_dir} should be clean." >&2; exit 1;
-      fi
-      }
+  if [[ "$(ls -A ${install_dir})" ]]; then
+    echo "Error: The installation directory ${install_dir} should be clean." >&2; exit 1;
+  fi
+}
 
-      function check_platform() {
-      local platform=$(uname)
-      local arch=$(uname -m)
+function check_platform() {
+    local platform=$(uname)
+    local arch=$(uname -m)
 
-      case $platform in
-      "Linux")
-      case $arch in
-      "i386"|"i686"|"x86")
-      file_ext="linux-386.tar.gz"
-      ;;
-      "x86_64"|"amd64")
-      file_ext="linux-amd64.tar.gz"
-      ;;
-      "aarch64"|"arm64")
-      file_ext="linux-arm64.tar.gz"
-      ;;
-      "armv5tel")
-      file_ext="linux-armv5.tar.gz"
-      ;;
-      "armv6l")
-      file_ext="linux-armv6.tar.gz"
-      ;;
-      "armv7"|"armv7l")
-      file_ext="linux-armv7.tar.gz"
-      ;;
-      "mips"|"mipsel")
-      file_ext="linux-mips.tar.gz"
-      ;;
-      "mips64")
-      file_ext="linux-mips64.tar.gz"
-      ;;
-      "mips64el")
-      file_ext="linux-mips64le.tar.gz"
-      ;;
-      "loong64")
-      file_ext="linux-loong64.tar.gz"
-      ;;
-      "sw_64")
-      file_ext="linux-sw64.tar.gz"
-      ;;
-      "riscv64")
-      file_ext="linux-riscv64.tar.gz"
-      ;;
-      *)
-      echo "Unsupported architecture: ${arch}" >&2
-      exit 1
-      ;;
-      esac
-      ;;
-      "Darwin")
-      case $arch in
-      "x86_64"|"amd64")
-      file_ext="mac-amd64.zip"
-      ;;
-      "arm64")
-      file_ext="mac-arm64.zip"
-      ;;
-      *)
-      echo "Unsupported architecture: ${arch}" >&2
-      exit 1
-      ;;
-      esac
-      ;;
-      "MINGW"*|"WSL"*|"Cygwin")
-      case $arch in
-      "i386"|"i686")
-      file_ext="windows-386.zip"
-      ;;
-      "x86_64"|"amd64")
-      file_ext="windows-amd64.zip"
-      ;;
-      *)
-      echo "Unsupported architecture: ${arch}" >&2
-      exit 1
-      ;;
-      esac
-      ;;
-      *)
-      echo "Unsupported platform: ${platform}" >&2
-      exit 1
-      ;;
-      esac
-      }
+    case $platform in
+        "Linux")
+            case $arch in
+                "i386"|"i686"|"x86")
+                    file_ext="linux-386.tar.gz"
+                    ;;
+                "x86_64"|"amd64")
+                    file_ext="linux-amd64.tar.gz"
+                    ;;
+                "aarch64"|"arm64")
+                    file_ext="linux-arm64.tar.gz"
+                    ;;
+                "armv5tel")
+                    file_ext="linux-armv5.tar.gz"
+                    ;;
+                "armv6l")
+                    file_ext="linux-armv6.tar.gz"
+                    ;;
+                "armv7"|"armv7l")
+                    file_ext="linux-armv7.tar.gz"
+                    ;;
+                "mips"|"mipsel")
+                    file_ext="linux-mips.tar.gz"
+                    ;;
+                "mips64")
+                    file_ext="linux-mips64.tar.gz"
+                    ;;
+                "mips64el")
+                    file_ext="linux-mips64le.tar.gz"
+                    ;;
+                "loong64")
+                    file_ext="linux-loong64.tar.gz"
+                    ;;
+                "sw_64")
+                    file_ext="linux-sw64.tar.gz"
+                    ;;                    
+                "riscv64")
+                    file_ext="linux-riscv64.tar.gz"
+                    ;;
+                *)
+                    echo "Unsupported architecture: ${arch}" >&2
+                    exit 1
+                    ;;
+            esac
+            ;;
+        "Darwin")
+            case $arch in
+                "x86_64"|"amd64")
+                    file_ext="mac-amd64.zip"
+                    ;;
+                "arm64")
+                    file_ext="mac-arm64.zip"
+                    ;;
+                *)
+                    echo "Unsupported architecture: ${arch}" >&2
+                    exit 1
+                    ;;
+            esac
+            ;;
+        "MINGW"*|"WSL"*|"Cygwin")
+            case $arch in
+                "i386"|"i686")
+                    file_ext="windows-386.zip"
+                    ;;
+                "x86_64"|"amd64")
+                    file_ext="windows-amd64.zip"
+                    ;;
+                *)
+                    echo "Unsupported architecture: ${arch}" >&2
+                    exit 1
+                    ;;
+            esac
+            ;;
+        *)
+            echo "Unsupported platform: ${platform}" >&2
+            exit 1
+            ;;
+    esac
+}
 
-      function install_binary() {
-      if [[ $(uname) == "Linux" && "${program_name}" == "easysearch" ]]; then
-      file_ext="linux-amd64.tar.gz"
-      fi
+function install_binary() {
+  if [[ $(uname) == "Linux" && "${program_name}" == "easysearch" ]]; then
+    file_ext="linux-amd64.tar.gz"
+  fi
 
-      local download_url="https://release.infinilabs.com/${program_name}/stable/${program_name}-${version}-${file_ext}"
-      echo "File: [$download_url]"
+  local download_url="https://release.infinilabs.com/${program_name}/stable/${program_name}-${version}-${file_ext}"
+  echo "File: [$download_url]"
 
-      tmp_dir="$(mktemp -d)"
-      cd "$tmp_dir"
+  tmp_dir="$(mktemp -d)"
+  cd "$tmp_dir"
 
-      if command -v curl >/dev/null 2>&1; then
-      curl -# -LO "$download_url"
-      elif command -v wget >/dev/null 2>&1; then
-      wget -q -nc --show-progress --progress=bar:force:noscroll "$download_url"
-      else
-      echo "Error: Could not find curl or wget, Please install wget or curl in advance." >&2; exit 1;
-      fi
+  if command -v curl >/dev/null 2>&1; then
+    curl -# -LO "$download_url"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q -nc --show-progress --progress=bar:force:noscroll "$download_url"
+  else
+    echo "Error: Could not find curl or wget, Please install wget or curl in advance." >&2; exit 1;
+  fi
 
-      if [[ "${file_ext}" == *".tar.gz" ]]; then
+  if [[ "${file_ext}" == *".tar.gz" ]]; then
       tar -xzf "${program_name}-${version}-${file_ext}" -C "$install_dir"
-      else
+  else
       unzip -q "${program_name}-${version}-${file_ext}" -d "$install_dir"
-      fi
+  fi
+  
+  cd "${install_dir}" && rm -rf "${tmp_dir}"
+}
 
-      cd "${install_dir}" && rm -rf "${tmp_dir}"
-      }
-
-      function main() {
-      while [[ $# -gt 0 ]]; do
-      case "$1" in
+function main() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
       -p|--program-name) program_name="$2"; shift 2 ;;
       -v|--version) version="$2"; shift 2 ;;
       -d|--install-dir) install_dir="$2"; shift 2 ;;
       *) print_usage ;;
-      esac
-      done
+    esac
+  done
 
-      program_name=${program_name:-console}
-      install_dir=${install_dir:-/opt/$program_name}
-      latest_version=$(get_latest_version)
-      version=${version:-$latest_version}
-      file_ext=""
+  program_name=${program_name:-console}
+  install_dir=${install_dir:-/opt/$program_name}
+  latest_version=$(get_latest_version)
+  version=${version:-$latest_version}
+  file_ext=""
 
-      if [[ -z "${version}" ]]; then
-      echo "Error: Could not obtain the latest version number. Please check the network and try again.">&2; exit 1;
-      else
-      echo "Name: [${program_name}], Version: [${version}], Path: [${install_dir}]"
-      fi
+  if [[ -z "${version}" ]]; then
+    echo "Error: Could not obtain the latest version number. Please check the network and try again.">&2; exit 1;
+  else
+    echo "Name: [${program_name}], Version: [${version}], Path: [${install_dir}]"
+  fi
 
-      check_dir
-      check_platform
-      install_binary
+  check_dir
+  check_platform
+  install_binary
 
-      [[ "$program_name" == "easysearch" ]] && exe_name="bin/initialize.sh && bin/${program_name}" ||
-      exe_name=./${program_name}-${file_ext%%.*}
+  [[ "$program_name" == "easysearch" ]] && exe_name="bin/initialize.sh && bin/${program_name}" || exe_name=./${program_name}-${file_ext%%.*}
 
-      echo ""
-      echo "Installation complete. [${program_name}] is ready to use!"
-      echo ""
-      echo ""
-      echo "----------------------------------------------------------------"
-      echo "cd ${install_dir} && ${exe_name}"
-      echo "----------------------------------------------------------------"
-      echo ""
-      echo ""
+  echo ""
+  echo "Installation complete. [${program_name}] is ready to use!"
+  echo ""
+  echo ""
+  echo "----------------------------------------------------------------"
+  echo "cd ${install_dir} && ${exe_name}"
+  echo "----------------------------------------------------------------"
+  echo ""
+  echo ""
 
-      print_footprint
-      }
+  print_footprint
+}
 
-      print_header
+print_header
 
-      main "$@"
+main "$@"
+
