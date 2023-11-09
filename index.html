@@ -3,7 +3,7 @@
 set -eo pipefail
 
 function print_usage() {
-  echo "Usage: curl -sSL http://get.infini.sh | bash -s -- [-p program_name] [-v program_version] [-d install_dir]"
+  echo "Usage: curl -skSL http://get.infini.cloud | bash -s -- [-p program_name] [-v program_version] [-d install_dir]"
   echo "Options:"
   echo "  -p, --program-name <name>   Name of the program to install which default is console"
   echo "  -v, --version <version>     Version of the program to install which default is latest"
@@ -66,7 +66,7 @@ __catch() {
 }
 
 function get_latest_version() {
-  echo $(curl -m3 -s "https://release.infinilabs.com/.latest" |sed 's/",/"/;s/"//g;s/://1' |grep -Ev '^[{}]' |grep "$program_name" |awk '{print $NF}')
+  echo $(curl -m3 -sk "https://release.infinilabs.com/.latest" |sed 's/",/"/;s/"//g;s/://1' |grep -Ev '^[{}]' |grep "$program_name" |awk '{print $NF}')
 }
 
 function check_dir() {
@@ -188,7 +188,7 @@ function install_binary() {
   cd "$tmp_dir"
 
   if command -v curl >/dev/null 2>&1; then
-    curl -# -LO "$download_url"
+    curl -# -kLO "$download_url"
   elif command -v wget >/dev/null 2>&1; then
     wget -q -nc --show-progress --progress=bar:force:noscroll "$download_url"
   else
