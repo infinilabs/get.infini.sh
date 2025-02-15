@@ -208,8 +208,8 @@ function install_binary() {
     type="snapshot"
   elif [[ -n "$version" ]] && [[ -n "$latest_version" ]]; then
     compare_versions "$version" "$latest_version"
-    compare_result=$?
-    if [[ $compare_result -eq 1 ]]; then
+    local result=$?
+    if [[ $result -eq 1 ]]; then
       type="snapshot"
     fi
   fi
