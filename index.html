@@ -226,12 +226,12 @@ function install_binary() {
   fi
 
   if [[ "${file_ext}" == *".tar.gz" ]]; then
-      if ! tar -xzf "${program_name}-${version}-${file_ext}" -C "$install_dir" >/dev/null 2>&1;; then
+      if ! tar -xzf "${program_name}-${version}-${file_ext}" -C "$install_dir" >/dev/null 2>&1; then
         echo "Error: Failed to extract tar.gz archive." >&2
         exit 1
       fi
   else
-      if ! unzip -q "${program_name}-${version}-${file_ext}" -d "$install_dir" >/dev/null 2>&1;; then
+      if ! unzip -q "${program_name}-${version}-${file_ext}" -d "$install_dir" >/dev/null 2>&1; then
         echo "Error: Failed to extract zip archive." >&2
         exit 1
       fi
