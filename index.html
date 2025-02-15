@@ -88,38 +88,32 @@ function check_dir() {
 }
 
 function compare_versions() {
-  # $1: version1
-  # $2: version2
-  # Returns 0 if version1 == version2
-  # Returns 1 if version1 > version2
-  # Returns 2 if version1 < version2
+  # $1: version1 (e.g., 1.10.1-1978 or 1.10.1)
+  # $2: version2 (e.g., 1.9.5)
+  # Returns 0 if base(v1) == base(v2)
+  # Returns 1 if base(v1) > base(v2)
+  # Returns 2 if base(v1) < base(v2)
+  # Returns 3 on error
 
-  IFS=. read -r v1_major v1_minor v1_patch <<< "$1"
-  IFS=. read -r v2_major v2_minor v2_patch <<< "$2"
+  local v1_base=$(echo "$1" | cut -d'-' -f1)
+  local v2_base="$2"
 
-  if [[ -z "$v1_major" || -z "$v1_minor" || -z "$v1_patch" ||
-        -z "$v2_major" || -z "$v2_minor" || -z "$v2_patch" ]]; then
-      echo "Error: Invalid version format" >&2
-      return 3
+  # Validate input format (major.minor.patch)
+  if ! [[ "$v1_base" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || ! [[ "$v2_base" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Error: Invalid version format.  Expected major.minor.patch" >&2
+    return 3
   fi
 
-  if (( v1_major > v2_major )); then
-    return 1
-  elif (( v1_major < v2_major )); then
-    return 2
-  fi
+  IFS=. read -r v1_major v1_minor v1_patch <<< "$v1_base"
+  IFS=. read -r v2_major v2_minor v2_patch <<< "$v2_base"
 
-  if (( v1_minor > v2_minor )); then
-    return 1
-  elif (( v1_minor < v2_minor )); then
-    return 2
-  fi
-
-  if (( v1_patch > v2_patch )); then
-    return 1
-  elif (( v1_patch < v2_patch )); then
-    return 2
-  fi
+  # Compare using arithmetic context
+  (( v1_major > v2_major )) && return 1
+  (( v1_major < v2_major )) && return 2
+  (( v1_minor > v2_minor )) && return 1
+  (( v1_minor < v2_minor )) && return 2
+  (( v1_patch > v2_patch )) && return 1
+  (( v1_patch < v2_patch )) && return 2
 
   return 0
 }
