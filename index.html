@@ -102,7 +102,7 @@ function compare_versions() {
       echo "Error: Invalid version format" >&2
       return 3
   fi
-    
+
   if (( v1_major > v2_major )); then
     return 1
   elif (( v1_major < v2_major )); then
@@ -209,14 +209,10 @@ function check_platform() {
 }
 
 function install_binary() {
-  if [[ $(uname) == "Linux" && "${program_name}" == "easysearch" ]]; then
-    file_ext="linux-amd64.tar.gz"
-  fi
-
   type="stable"
   if [[ "$version" =~ NIGHTLY ]] || [[ "$version" =~ SNAPSHOT ]]; then
     type="snapshot"
-  elif [[ -n "$version" ]]; then
+  elif [[ -n "$version" ]] && [ -n "$latest_version" ]]; then
     compare_versions "$version" "$latest_version"
     compare_result=$?
     if [[ $compare_result -eq 1 ]]; then
