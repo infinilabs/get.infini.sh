@@ -87,6 +87,43 @@ function check_dir() {
   fi
 }
 
+function compare_versions() {
+  # $1: version1
+  # $2: version2
+  # Returns 0 if version1 == version2
+  # Returns 1 if version1 > version2
+  # Returns 2 if version1 < version2
+
+  IFS=. read -r v1_major v1_minor v1_patch <<< "$1"
+  IFS=. read -r v2_major v2_minor v2_patch <<< "$2"
+
+  if [[ -z "$v1_major" || -z "$v1_minor" || -z "$v1_patch" ||
+        -z "$v2_major" || -z "$v2_minor" || -z "$v2_patch" ]]; then
+      echo "Error: Invalid version format" >&2
+      return 3
+  fi
+    
+  if (( v1_major > v2_major )); then
+    return 1
+  elif (( v1_major < v2_major )); then
+    return 2
+  fi
+
+  if (( v1_minor > v2_minor )); then
+    return 1
+  elif (( v1_minor < v2_minor )); then
+    return 2
+  fi
+
+  if (( v1_patch > v2_patch )); then
+    return 1
+  elif (( v1_patch < v2_patch )); then
+    return 2
+  fi
+
+  return 0
+}
+
 function check_platform() {
     local platform=$(uname)
     local arch=$(uname -m)
@@ -177,9 +214,16 @@ function install_binary() {
   fi
 
   type="stable"
-  if [[ $version =~ NIGHTLY ]]; then
+  if [[ "$version" =~ NIGHTLY ]] || [[ "$version" =~ SNAPSHOT ]]; then
     type="snapshot"
+  elif [[ -n "$version" ]]; then
+    compare_versions "$version" "$latest_version"
+    compare_result=$?
+    if [[ $compare_result -eq 1 ]]; then
+      type="snapshot"
+    fi
   fi
+  
 
   local download_url="https://release.infinilabs.com/${program_name}/${type}/${program_name}-${version}-${file_ext}"
   echo "File: [$download_url]"
@@ -196,9 +240,15 @@ function install_binary() {
   fi
 
   if [[ "${file_ext}" == *".tar.gz" ]]; then
-      tar -xzf "${program_name}-${version}-${file_ext}" -C "$install_dir"
+      if ! tar -xzf "${program_name}-${version}-${file_ext}" -C "$install_dir"; then
+        echo "Error: Failed to extract tar.gz archive." >&2
+        exit 1
+      fi
   else
-      unzip -q "${program_name}-${version}-${file_ext}" -d "$install_dir"
+      if ! unzip -q "${program_name}-${version}-${file_ext}" -d "$install_dir"; then
+        echo "Error: Failed to extract zip archive." >&2
+        exit 1
+      fi
   fi
   
   cd "${install_dir}" && rm -rf "${tmp_dir}"
@@ -225,6 +275,7 @@ function main() {
   else
     echo "Name: [${program_name}], Version: [${version}], Path: [${install_dir}]"
   fi
+  
 
   check_dir
   check_platform
