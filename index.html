@@ -3,7 +3,7 @@
 set -eo pipefail
 
 function print_usage() {
-  echo "Usage: curl -skSL http://get.infini.cloud | bash -s -- [-p program_name] [-v program_version] [-d install_dir]"
+  echo "Usage: curl -sSL https://get.infini.cloud | bash -s -- [-p program_name] [-v program_version] [-d install_dir]"
   echo "Options:"
   echo "  -p, --program-name <name>   Name of the program to install which default is console"
   echo "  -v, --version <version>     Version of the program to install which default is latest"
@@ -70,13 +70,16 @@ function get_latest_version() {
 }
 
 function check_dir() {
+  if [[ "${install_dir}" != /* ]]; then
+    install_dir="$(pwd)/${install_dir}"
+  fi
   if [[ ! -d "${install_dir}" ]]; then
     __try mkdir -p "${install_dir}"
     if __catch e; then
       echo -e "Error: Unable to create installation directory, please manually create and reinstall.\nsudo mkdir -p ${install_dir} && sudo chown -R \$(whoami) ${install_dir}" >&2; exit 1;
     fi
   fi
-
+  install_dir=$(realpath "${install_dir}")
   owner=$(ls -ld "${install_dir}" |awk '{print $3}')
   if [[ "${owner}" != "$(whoami)" ]]; then
     echo -e "Error: The installation directory ${install_dir} should be owner by current user.\nsudo chown -R \$(whoami) ${install_dir}" >&2; exit 1;
