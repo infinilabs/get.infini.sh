@@ -19,7 +19,7 @@
 
 ---
 
-## 🐳 方法一：通过 Docker 运行 INFINI Console 和 Easysearch (`start-local.sh`)
+## 🐳 方法一：通过 Docker 运行 INFINI Console 和 Easysearch
 
 此方法使用 Docker 和 Docker Compose 创建一个本地的、持久化的 INFINI Console 和 INFINI Easysearch 环境。它非常适合开发、功能测试以及快速演示，而不会直接影响您的宿主系统。
 
@@ -75,14 +75,14 @@ curl -fsSL https://get.infini.cloud/start-local | sh -s -- up --nodes 3 --passwo
 
 * **INFINI Console**: 访问 `http://localhost:9000` 。
 * **INFINI Easysearch**:
-* HTTP API: 通常在 `http://localhost:9200`。
+* HTTP API: 通常在 `https://localhost:9200`。
 * 默认用户: `admin`, 密码: 通过 `-p` 设置的密码或默认密码。
 
 详细端口信息请参考脚本的 `help` 命令或其输出。
 
 ---
 
-## 💻 方法二：直接主机安装 (`get.infini.cloud`)
+## 💻 方法二：直接主机安装
 
 此方法将 INFINI 产品（Console, Gateway, Easysearch, Loadgen 等）直接安装到您的 Linux 或 macOS 宿主机系统上。
 
@@ -113,7 +113,7 @@ curl -sSL https://get.infini.cloud | bash -s -- -p loadgen -d loadgen_files
 curl -sSL https://get.infini.cloud | bash -s -- -p easysearch -d /data/my_easysearch -v 1.13.0
 ```
 
-### 主机安装脚本选项 (`get.infini.cloud`)
+### 主机安装脚本选项
 
 * `-p <产品名称>`: **必需**。指定要安装的产品 (例如 `console`, `gateway`, `easysearch`, `loadgen`, `agent`, `coco/app`, `coco/server`)。
 * `-d <目录路径>`: 可选。指定目标安装目录。如果未提供，脚本可能使用默认位置或相对于当前目录安装。

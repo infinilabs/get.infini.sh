@@ -19,7 +19,7 @@ It offers two main functionalities:
 
 ---
 
-## 🐳 Method 1: Run INFINI Console & Easysearch via Docker (`start-local.sh`)
+## 🐳 Method 1: Run INFINI Console & Easysearch via Docker
 
 This method uses Docker and Docker Compose to create a local, persistent environment for INFINI Console and INFINI Easysearch. It's perfect for development, testing features, and quick demonstrations without affecting your host system directly.
 
@@ -75,14 +75,14 @@ After execution, a working directory (default: `./startlocal`) will be created c
 
 * **INFINI Console**: Typically at `http://localhost:9000` (check script output for exact port).
 * **INFINI Easysearch**:
-* HTTP API: Typically at `http://localhost:9200`.
+* HTTP API: Typically at `https://localhost:9200`.
 * Default user: `admin`, Password: As set via `-p` or the default.
 
 Refer to the script's `help` command or output for detailed port information.
 
 ---
 
-## 💻 Method 2: Direct Host Installation (`get.infini.cloud`)
+## 💻 Method 2: Direct Host Installation
 
 This method installs INFINI products (Console, Gateway, Easysearch, Loadgen, etc.) directly onto your Linux or macOS host system.
 
@@ -114,7 +114,7 @@ curl -sSL https://get.infini.cloud | bash -s -- -p loadgen -d loadgen_files
 curl -sSL https://get.infini.cloud | bash -s -- -p easysearch -d /data/my_easysearch -v 1.13.0
 ```
 
-### Host Installer Script Options (`get.infini.cloud`)
+### Host Installer Script Options
 
 
 * `-p <product_name>`: **Required**. Specifies the product to install (e.g., `console`, `gateway`, `easysearch`, `loadgen`, `agent`, `coco/app`, `coco/server`).
