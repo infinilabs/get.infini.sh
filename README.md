@@ -38,10 +38,10 @@ Execute the script directly via `curl`. This always fetches the latest version o
 
 ```bash
 # Start default setup (INFINI Console + 1 INFINI Easysearch node)
-curl -fsSL https://get.infini.cloud/start-local.sh | sh -s -- up
+curl -fsSL https://get.infini.cloud/start-local | sh -s -- up
 
 # Example: Start with 3 Easysearch nodes, custom password, and enable metrics
-curl -fsSL https://get.infini.cloud/start-local.sh | sh -s -- up --nodes 3 --password "MySecurePass123!" --metrics-agent
+curl -fsSL https://get.infini.cloud/start-local | sh -s -- up --nodes 3 --password "MySecurePass123." --metrics-agent
 ```
 
 After execution, a working directory (default: `./startlocal`) will be created containing:
@@ -65,7 +65,7 @@ After execution, a working directory (default: `./startlocal`) will be created c
 * `-cv TAG`, `--console-version TAG`: INFINI Console image tag (e.g., `1.29.6`). Defaults to latest stable or a predefined version.
 * `-ev TAG`, `--easysearch-version TAG`: INFINI Easysearch image tag (e.g., `1.13.0`). Defaults accordingly.
 * `-n N`, `--nodes N`: Number of Easysearch nodes (default: 1).
-* `-p PASSWORD`, `--password PASSWORD`: Initial admin password for Easysearch (default: `ShouldChangeme123!`). **Change this!**
+* `-p PASSWORD`, `--password PASSWORD`: Initial admin password for Easysearch (default: `ShouldChangeme123.`). **Change this!**
 * `--services s1[,s2,...]`: Comma-separated services to start with `up` (e.g., `console,easysearch`). Or list after `up` command. Defaults to `console easysearch`.
 * `--metrics-agent`: Enables Easysearch metrics collection. `METRICS_CONFIG_SERVER` auto-sets to internal Console.
 * `-wd PATH`, `--work-dir PATH`: Custom working directory for operational files and data (default: `./startlocal`).
