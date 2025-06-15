@@ -1,4 +1,13 @@
-# How to use
+<p align="center">
+<a href="https://infinilabs.com/"><img src="docs/images/infinilabs.svg" alt="banner" width="200px"></a>
+</p>
+
+## What is Repo do
+
+> English | [中文](README_zh.md)
+
+
+# Install INFINI Products to Local
 
 ```bash
 #Please ensure that the current operator user has permission to install the directory
