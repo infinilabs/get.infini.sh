@@ -38,10 +38,10 @@
 
 ```bash
 # 启动默认配置 (INFINI Console + 1个 INFINI Easysearch 节点)
-curl -fsSL https://get.infini.cloud/start-local.sh | sh -s -- up
+curl -fsSL https://get.infini.cloud/start-local | sh -s -- up
 
 # 示例：启动3个 Easysearch 节点，自定义密码，并开启指标收集
-curl -fsSL https://get.infini.cloud/start-local.sh | sh -s -- up --nodes 3 --password "MySecurePass123." --metrics-agent
+curl -fsSL https://get.infini.cloud/start-local | sh -s -- up --nodes 3 --password "MySecurePass123." --metrics-agent
 ```
 
 脚本执行后，将在当前目录下创建一个工作目录（默认为 `./startlocal`），其中包含：
