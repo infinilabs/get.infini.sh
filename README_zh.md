@@ -2,6 +2,10 @@
 <a href="https://infinilabs.com/"><img src="docs/images/infinilabs.svg" alt="INFINI Labs Logo" width="200px"></a>
 </p>
 
+<p align="center">
+<strong>为 INFINI Labs 产品提供快速本地搭建与直接安装的实用工具集。</strong>
+</p>
+
 # INFINI Labs - 本地安装与设置工具
 
 > [English (英文)](README.md) | **中文**
@@ -11,7 +15,7 @@
 主要提供两种功能：
 
 1. **通过 Docker 运行 (推荐用于开发/测试)**: 使用 `start-local.sh` 脚本，通过 Docker 容器快速启动 INFINI Console 和 INFINI Easysearch，并配置持久化存储。非常适合隔离的测试和开发环境。
-2. **直接主机安装**: 使用 `get.infini.sh` (通过 `http://get.infini.sh` 访问) 将 INFINI 产品直接下载并安装到您的宿主机 (Linux/macOS) 上。
+2. **直接主机安装**: 使用 `get.infini.cloud` (通过 `https://get.infini.cloud` 访问) 将 INFINI 产品直接下载并安装到您的宿主机 (Linux/macOS) 上。
 
 ---
 
@@ -34,10 +38,10 @@
 
 ```bash
 # 启动默认配置 (INFINI Console + 1个 INFINI Easysearch 节点)
-curl -fsSL http://get.infini.cloud/start-local.sh | sh -s -- up
+curl -fsSL https://get.infini.cloud/start-local.sh | sh -s -- up
 
 # 示例：启动3个 Easysearch 节点，自定义密码，并开启指标收集
-curl -fsSL http://get.infini.cloud/start-local.sh | sh -s -- up --nodes 3 --password "MySecurePass123." --metrics-agent
+curl -fsSL https://get.infini.cloud/start-local.sh | sh -s -- up --nodes 3 --password "MySecurePass123." --metrics-agent
 ```
 
 脚本执行后，将在当前目录下创建一个工作目录（默认为 `./startlocal`），其中包含：
@@ -63,13 +67,13 @@ curl -fsSL http://get.infini.cloud/start-local.sh | sh -s -- up --nodes 3 --pass
 * `-n N`, `--nodes N`: Easysearch 节点数量 (默认: 1)。
 * `-p PASSWORD`, `--password PASSWORD`: Easysearch `admin` 用户初始密码 (默认: `ShouldChangeme123.`)。**请务必修改！**
 * `--services s1[,s2,...]`: 指定 `up` 命令启动的服务 (例如 `console,easysearch`)。也可在 `up`后直接列出。默认启动 `console easysearch`。
-* `--metrics-agent`: 启用 Easysearch 指标收集。`METRICS_CONFIG_SERVER` 将自动设为内部 Console 地址。
+* `--metrics-agent`: 启用 Agent 指标收集。`METRICS_CONFIG_SERVER` 将自动设为内部 Console 地址。
 * `-wd PATH`, `--work-dir PATH`: 自定义工作目录，用于存放操作文件和持久化数据 (默认: `./startlocal`)。
 * `-h`, `--help`: 显示帮助信息。
 
 ### 访问服务 (Docker 方式)
 
-* **INFINI Console**: 通常在 `http://localhost:9000` (请检查脚本输出以获取确切端口)。
+* **INFINI Console**: 访问 `http://localhost:9000` 。
 * **INFINI Easysearch**:
 * HTTP API: 通常在 `http://localhost:9200`。
 * 默认用户: `admin`, 密码: 通过 `-p` 设置的密码或默认密码。
@@ -78,47 +82,42 @@ curl -fsSL http://get.infini.cloud/start-local.sh | sh -s -- up --nodes 3 --pass
 
 ---
 
-## 💻 方法二：直接主机安装 (`get.infini.sh`)
+## 💻 方法二：直接主机安装 (`get.infini.cloud`)
 
 此方法将 INFINI 产品（Console, Gateway, Easysearch, Loadgen 等）直接安装到您的 Linux 或 macOS 宿主机系统上。
 
 ### 前提条件
 
-* 确保当前用户对目标安装目录拥有**写入权限**。如果安装到 `/opt/` 等系统级位置，初始创建目录和更改所有权可能需要 `sudo`。
+* 确保当前用户对目标安装目录拥有**写入权限**。默认安装到 `/opt` 系统级位置，初始创建目录和更改所有权可能需要 `sudo`。
 * 已安装 `curl` 和 `bash` (或兼容的 shell)。
 
 ### 安装示例
 
-安装脚本从 `http://get.infini.sh` 获取 (这应该是您的主机安装脚本的 URL)。
+安装脚本从 `https://get.infini.cloud` 获取。
 
 ```bash
 # 确保当前操作用户对安装目录有权限。
 # 例如：为 Console 初始化一个通用的安装目录
-# sudo mkdir -p /opt/console && sudo chown -R ${USER}:${GROUPS[0]} /opt/console
-# (注意: ${GROUPS[0]} 可能不具备可移植性，可以考虑仅使用 ${USER} 或指定一个组)
+# sudo mkdir -p /opt/console && sudo chown -R ${USER} /opt/console
 
 # 安装 Console (最新版)到默认或预先准备好的目录
-curl -sSL http://get.infini.sh | bash -s -- -p console
+curl -sSL https://get.infini.cloud | bash -s -- -p console
 
 # 安装 Gateway (最新版) 并指定安装目录
-curl -sSL http://get.infini.sh | bash -s -- -p gateway -d /opt/gateway
+curl -sSL https://get.infini.cloud | bash -s -- -p gateway -d /opt/gateway
 
 # 安装 Loadgen (最新版) 到当前路径下的相对目录
-curl -sSL http://get.infini.sh | bash -s -- -p loadgen -d loadgen_files
+curl -sSL https://get.infini.cloud | bash -s -- -p loadgen -d loadgen_files
 
 # 安装 Easysearch，并指定安装目录和版本
-curl -sSL http://get.infini.sh | bash -s -- -p easysearch -d /data/my_easysearch -v 1.13.0
+curl -sSL https://get.infini.cloud | bash -s -- -p easysearch -d /data/my_easysearch -v 1.13.0
 ```
 
-### 主机安装脚本选项 (`get.infini.sh`)
-
-*(此部分需要根据您的 `get.infini.sh` 脚本实际支持的选项进行填写。以下是基于您示例的常见选项。)*
+### 主机安装脚本选项 (`get.infini.cloud`)
 
 * `-p <产品名称>`: **必需**。指定要安装的产品 (例如 `console`, `gateway`, `easysearch`, `loadgen`, `agent`, `coco/app`, `coco/server`)。
 * `-d <目录路径>`: 可选。指定目标安装目录。如果未提供，脚本可能使用默认位置或相对于当前目录安装。
 * `-v <版本号>`: 可选。指定要安装的产品版本。如果未提供，则安装最新的稳定版本。
-* `--snapshot`: 可选。安装最新的快照版本而不是稳定版。
-* *(在此添加您的脚本支持的其他选项，例如 `--no-service`, `--user` 等)*
 
 ### 管理主机安装
 
@@ -129,10 +128,8 @@ curl -sSL http://get.infini.sh | bash -s -- -p easysearch -d /data/my_easysearch
 ## 📝 诊断与日志
 
 * **`start-local.sh` (Docker 方式)**: 如果在执行 `up` 命令时发生错误，通常会在工作目录（默认为 `./startlocal`）下创建一个名为 `start-local-error.log` 的诊断日志文件，其中包含系统信息和相关的 Docker 日志。
-* **`get.infini.sh` (主机安装方式)**: *(在此描述您的主机安装脚本提供的任何日志记录或错误报告机制。)*
+* **`get.infini.cloud` (主机安装方式)**: 直接进入相应的日志目录查看即可。
 
 ## 🤝 贡献与反馈
 
 我们欢迎各种贡献和反馈！请随时通过 Issues 或 Pull Requests 提出问题、报告错误或贡献代码。
-
-*(在此添加指向您的实际项目仓库、问题跟踪器以及任何相关社区渠道的链接。)*
