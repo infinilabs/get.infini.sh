@@ -2,12 +2,15 @@
 
 set -eo pipefail
 
+DOWNLOAD_DOMAIN="https://release.infinilabs.com"
+
 function print_usage() {
-  echo "Usage: curl -sSL https://get.infini.cloud | bash -s -- [-p program_name] [-v program_version] [-d install_dir]"
+  echo "Usage: curl -sSL https://get.infini.cloud | bash -s -- [-p program_name] [-v program_version] [-d install_dir] [-s]"
   echo "Options:"
   echo "  -p, --program-name <name>   Name of the program to install which default is console"
   echo "  -v, --version <version>     Version of the program to install which default is latest"
   echo "  -d, --install-dir <dir>     Directory of the program install which default is /opt/program"
+  echo "  -s, --snapshot              Force to install from snapshot repository"
   exit 1
 }
 
@@ -43,13 +46,13 @@ function print_header() {
 }
 
 function print_footprint() {
-		echo "   __ _  __ ____ __ _  __ __     "
-		echo "  / // |/ // __// // |/ // /    "
-		echo " / // || // _/ / // || // /    "
-		echo "/_//_/|_//_/  /_//_/|_//_/   "
-		echo ""
-		echo "©INFINI.LTD, All Rights Reserved."
-		echo ""
+    echo "   __ _  __ ____ __ _  __ __     "
+    echo "  / // |/ // __// // |/ // /    "
+    echo " / // || // _/ / // || // /    "
+    echo "/_//_/|_//_/  /_//_/|_//_/   "
+    echo ""
+    echo "©INFINI.LTD, All Rights Reserved."
+    echo ""
 }
 
 __try() {
@@ -66,7 +69,7 @@ __catch() {
 }
 
 function get_latest_version() {
-  echo $(curl -m30 -sk "https://release.infinilabs.com/.latest" |sed 's/",/"/;s/"//g;s/://1' |grep -Ev '^[{}]' |grep "$program_name" |awk '{print $NF}')
+  echo $(curl -m30 -sk "${DOWNLOAD_DOMAIN}/.latest" |sed 's/",/"/;s/"//g;s/://1' |grep -Ev '^[{}]' |grep "$program_name" |awk '{print $NF}')
 }
 
 function check_dir() {
@@ -204,7 +207,10 @@ function check_platform() {
 
 function install_binary() {
   type="stable"
-  if [[ "$version" =~ NIGHTLY ]] || [[ "$version" =~ SNAPSHOT ]]; then
+  
+  if [[ "$force_snapshot" == "true" ]]; then
+    type="snapshot"
+  elif [[ "$version" =~ NIGHTLY ]] || [[ "$version" =~ SNAPSHOT ]]; then
     type="snapshot"
   elif [[ -n "$version" ]] && [[ -n "$latest_version" ]]; then
     local result=$(compare_versions "$version" "$latest_version")
@@ -213,29 +219,52 @@ function install_binary() {
     fi
   fi
   
+  local repo_path="${program_name}/${type}"
 
-  local download_url="https://release.infinilabs.com/${program_name}/${type}/${program_name}-${version}-${file_ext}"
+  if [[ "$program_name" == "cloud" ]]; then
+      repo_path=".${program_name}"
+  fi
+
+  local download_url="${DOWNLOAD_DOMAIN}/${repo_path}/${program_name}-${version}-${file_ext}"
+
   echo "File: [$download_url]"
 
   tmp_dir="$(mktemp -d)"
   cd "$tmp_dir"
 
+  local filename="${program_name}-${version}-${file_ext}"
+
   if command -v curl >/dev/null 2>&1; then
-    curl -# -kLO "$download_url"
+    if ! curl -f -S -# -kLO "$download_url"; then
+        echo ""
+        echo "Error: Download failed! Please check if the version [${version}] exists or network connection." >&2
+        echo "Url: ${download_url}" >&2
+        exit 1
+    fi
   elif command -v wget >/dev/null 2>&1; then
-    wget -q -nc --show-progress --progress=bar:force:noscroll "$download_url"
+    if ! wget -q -nc --show-progress --progress=bar:force:noscroll "$download_url"; then
+        echo ""
+        echo "Error: Download failed! Please check if the version [${version}] exists or network connection." >&2
+        echo "Url: ${download_url}" >&2
+        exit 1
+    fi
   else
     echo "Error: Could not find curl or wget, Please install wget or curl in advance." >&2; exit 1;
   fi
 
+  if [[ ! -s "${filename}" ]]; then
+      echo "Error: Downloaded file is empty or does not exist." >&2
+      exit 1
+  fi
+
   if [[ "${file_ext}" == *".tar.gz" ]]; then
-      if ! tar -xzf "${program_name}-${version}-${file_ext}" -C "$install_dir" >/dev/null 2>&1; then
-        echo "Error: Failed to extract tar.gz archive." >&2
+      if ! tar -xzf "${filename}" -C "$install_dir" >/dev/null 2>&1; then
+        echo "Error: Failed to extract tar.gz archive. The file might be corrupted." >&2
         exit 1
       fi
   else
-      if ! unzip -q "${program_name}-${version}-${file_ext}" -d "$install_dir" >/dev/null 2>&1; then
-        echo "Error: Failed to extract zip archive." >&2
+      if ! unzip -q "${filename}" -d "$install_dir" >/dev/null 2>&1; then
+        echo "Error: Failed to extract zip archive. The file might be corrupted." >&2
         exit 1
       fi
   fi
@@ -244,20 +273,25 @@ function install_binary() {
 }
 
 function main() {
+  force_snapshot="false"
+
   while [[ $# -gt 0 ]]; do
     case "$1" in
       -p|--program-name) program_name="$2"; shift 2 ;;
       -v|--version) version="$2"; shift 2 ;;
       -d|--install-dir) install_dir="$2"; shift 2 ;;
+      -s|--snapshot) force_snapshot="true"; shift 1 ;;
       *) print_usage ;;
     esac
   done
 
+  file_ext=""
   program_name=${program_name:-console}
   install_dir=${install_dir:-/opt/$program_name}
   latest_version=$(get_latest_version)
   version=${version:-$latest_version}
-  file_ext=""
+
+  [[ -n "$latest_version" && "$latest_version" == "${version}-"* ]] && version="$latest_version"
 
   if [[ -z "${version}" ]]; then
     echo "Error: Could not obtain the latest version number. Please check the network and try again.">&2; exit 1;
@@ -265,7 +299,6 @@ function main() {
     echo "Name: [${program_name}], Version: [${version}], Path: [${install_dir}]"
   fi
   
-
   check_dir
   check_platform
   install_binary
@@ -288,4 +321,3 @@ function main() {
 print_header
 
 main "$@"
-
