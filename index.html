@@ -222,7 +222,7 @@ function install_binary() {
   local repo_path="${program_name}/${type}"
 
   if [[ "$program_name" == "cloud" ]]; then
-      repo_path=".${program_name}"
+      repo_path=".${program_name}/${type}"
   fi
 
   local download_url="${DOWNLOAD_DOMAIN}/${repo_path}/${program_name}-${version}-${file_ext}"
