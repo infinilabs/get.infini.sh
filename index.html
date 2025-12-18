@@ -4,7 +4,7 @@ set -eo pipefail
 
 DOWNLOAD_DOMAIN="https://release.infinilabs.com"
 
-function print_usage() {
+print_usage() {
   echo "Usage: curl -sSL https://get.infini.cloud | bash -s -- [-p program_name] [-v program_version] [-d install_dir] [-s]"
   echo "Options:"
   echo "  -p, --program-name <name>   Name of the program to install which default is console"
@@ -14,7 +14,7 @@ function print_usage() {
   exit 1
 }
 
-function print_header() {
+print_header() {
     echo "                                            "
     echo "                                 @@@@@@@@@@@"
     echo "                                @@@@@@@@@@@@"
@@ -45,7 +45,7 @@ function print_header() {
     echo ""
 }
 
-function print_footprint() {
+print_footprint() {
     echo "   __ _  __ ____ __ _  __ __     "
     echo "  / // |/ // __// // |/ // /    "
     echo " / // || // _/ / // || // /    "
@@ -68,11 +68,11 @@ __catch() {
   [[ $_old_try -ne 0 ]]
 }
 
-function get_latest_version() {
+get_latest_version() {
   echo $(curl -m30 -sk "${DOWNLOAD_DOMAIN}/.latest" |sed 's/",/"/;s/"//g;s/://1' |grep -Ev '^[{}]' |grep "$program_name" |awk '{print $NF}')
 }
 
-function check_dir() {
+check_dir() {
   if [[ "${install_dir}" != /* ]]; then
     install_dir="$(pwd)/${install_dir}"
   fi
@@ -93,15 +93,10 @@ function check_dir() {
   fi
 }
 
-function compare_versions() {
-  # $1: version1 (e.g., 1.10.1-1978 or 1.10.1)
-  # $2: version2 (e.g., 1.9.5)
-  # Prints: "equal", "greater", or "less" to stdout
-
+compare_versions() {
   local v1_base=$(echo "$1" | cut -d'-' -f1)
   local v2_base=$(echo "$2" | cut -d'-' -f1)
 
-  # Validate input format (major.minor.patch) and exit on error
   [[ "$v1_base" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [[ "$v2_base" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
     echo "Error: Invalid version format. Expected major.minor.patch" >&2
     exit 1
@@ -110,7 +105,6 @@ function compare_versions() {
   IFS=. read -r v1_major v1_minor v1_patch <<< "$v1_base"
   IFS=. read -r v2_major v2_minor v2_patch <<< "$v2_base"
 
-  # Chain comparisons using short-circuit evaluation
   (( v1_major > v2_major )) && echo "greater" && return
   (( v1_major < v2_major )) && echo "less" && return
   (( v1_minor > v2_minor )) && echo "greater" && return
@@ -121,7 +115,7 @@ function compare_versions() {
   echo "equal"
 }
 
-function check_platform() {
+check_platform() {
     local platform=$(uname)
     local arch=$(uname -m)
 
@@ -205,7 +199,7 @@ function check_platform() {
     esac
 }
 
-function install_binary() {
+install_binary() {
   type="stable"
   
   if [[ "$force_snapshot" == "true" ]]; then
@@ -219,37 +213,46 @@ function install_binary() {
     fi
   fi
   
-  local repo_path="${program_name}/${type}"
-
-  if [[ "$program_name" == "cloud" ]]; then
-      repo_path=".${program_name}/${type}"
-  fi
-
-  local download_url="${DOWNLOAD_DOMAIN}/${repo_path}/${program_name}-${version}-${file_ext}"
-
-  echo "File: [$download_url]"
-
   tmp_dir="$(mktemp -d)"
   cd "$tmp_dir"
-
   local filename="${program_name}-${version}-${file_ext}"
 
-  if command -v curl >/dev/null 2>&1; then
-    if ! curl -f -S -# -kLO "$download_url"; then
-        echo ""
-        echo "Error: Download failed! Please check if the version [${version}] exists or network connection." >&2
-        echo "Url: ${download_url}" >&2
-        exit 1
+  perform_download() {
+    local current_type=$1
+    local repo_path="${program_name}/${current_type}"
+
+    if [[ "$program_name" == "cloud" ]]; then
+        repo_path=".${program_name}/${current_type}"
     fi
-  elif command -v wget >/dev/null 2>&1; then
-    if ! wget -q -nc --show-progress --progress=bar:force:noscroll "$download_url"; then
-        echo ""
-        echo "Error: Download failed! Please check if the version [${version}] exists or network connection." >&2
-        echo "Url: ${download_url}" >&2
-        exit 1
+
+    local url="${DOWNLOAD_DOMAIN}/${repo_path}/${program_name}-${version}-${file_ext}"
+    echo "File: [$url]"
+
+    if command -v curl >/dev/null 2>&1; then
+      # -f: fail silently on server errors (404), important for fallback logic
+      curl -f -S -# -kLO "$url"
+    elif command -v wget >/dev/null 2>&1; then
+      wget -q -nc --show-progress --progress=bar:force:noscroll "$url"
+    else
+      echo "Error: Could not find curl or wget, Please install wget or curl in advance." >&2; return 1;
     fi
-  else
-    echo "Error: Could not find curl or wget, Please install wget or curl in advance." >&2; exit 1;
+  }
+
+  if ! perform_download "$type"; then
+    if [[ "$type" == "snapshot" ]]; then
+      echo ""
+      echo "Snapshot download failed. Trying stable repository..."
+      if ! perform_download "stable"; then
+         echo ""
+         echo "Error: Download failed from both snapshot and stable repositories." >&2
+         echo "Please check if the version [${version}] exists or network connection." >&2
+         exit 1
+      fi
+    else
+      echo ""
+      echo "Error: Download failed! Please check if the version [${version}] exists or network connection." >&2
+      exit 1
+    fi
   fi
 
   if [[ ! -s "${filename}" ]]; then
@@ -272,7 +275,7 @@ function install_binary() {
   cd "${install_dir}" && rm -rf "${tmp_dir}"
 }
 
-function main() {
+main() {
   force_snapshot="false"
 
   while [[ $# -gt 0 ]]; do
@@ -285,7 +288,6 @@ function main() {
     esac
   done
 
-  file_ext=""
   program_name=${program_name:-console}
   install_dir=${install_dir:-/opt/$program_name}
   latest_version=$(get_latest_version)
@@ -294,6 +296,8 @@ function main() {
   if [[ -n "$latest_version" && ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+-[0-9]+$ ]]; then
     version="$latest_version"
   fi
+
+  file_ext=""
 
   if [[ -z "${version}" ]]; then
     echo "Error: Could not obtain the latest version number. Please check the network and try again.">&2; exit 1;
