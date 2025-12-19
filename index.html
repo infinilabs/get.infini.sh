@@ -240,18 +240,19 @@ install_binary() {
 
   if ! perform_download "$type"; then
     if [[ "$type" == "snapshot" ]]; then
-      echo ""
-      echo "Snapshot download failed. Trying stable repository..."
-      if ! perform_download "stable"; then
-         echo ""
-         echo "Error: Download failed from both snapshot and stable repositories." >&2
-         echo "Please check if the version [${version}] exists or network connection." >&2
-         exit 1
-      fi
+      fallback_type="stable"
     else
-      echo ""
-      echo "Error: Download failed! Please check if the version [${version}] exists or network connection." >&2
-      exit 1
+      fallback_type="snapshot"
+    fi
+
+    echo ""
+    echo "Download from [${type}] repository failed. Trying [${fallback_type}] repository..."
+
+    if ! perform_download "$fallback_type"; then
+       echo ""
+       echo "Error: Download failed from both snapshot and stable repositories." >&2
+       echo "Please check if the version [${version}] exists or network connection." >&2
+       exit 1
     fi
   fi
 
